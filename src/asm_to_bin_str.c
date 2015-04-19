@@ -1,15 +1,38 @@
 #include "asm_to_bin_str.h"
 #include <stdio.h>
 
-static short strings_equal(char* str1, char* str2)
+const char* command_strings[] =
 {
-	return (strcmp(str1, str2) == 0);
-}
+	"ADD",
+	"SUB",
+	"SET",
+	"AND",
+	"OR",
+	"NAND",
+	"NOR",
+	"XOR",
+	"XNOR",
+	"RSHIFT",
+	"LSHIFT",
+	"INVERT"
+};
 
-static size_t str_to_int(char* str)
+typedef enum command
 {
-	return atoi(str);
-}
+	COMMAND_ADD,
+	COMMAND_SUB,
+	COMMAND_SET,
+	COMMAND_AND,
+	COMMAND_OR,
+	COMMAND_NAND,
+	COMMAND_NOR,
+	COMMAND_XOR,
+	COMMAND_XNOR,
+	COMMAND_RSHIFT,
+	COMMAND_LSHIFT,
+	COMMAND_INVERT,
+	COMMAND_NONE
+} command;
 
 static void int_to_bin_str(size_t num, size_t nbits, trap_string* tstr)
 {
@@ -20,12 +43,7 @@ static void int_to_bin_str(size_t num, size_t nbits, trap_string* tstr)
 	}
 }
 
-static short is_whitespace(char c)
-{
-	return (c == ' ' || c == '\t' || c == '\n');
-}
-
-static short append_bin_line(
+static int append_bin_line(
 		trap_string* binstr,
 		char op[IS_WIDTH_OP_CODE],
 		char readra,
@@ -55,7 +73,7 @@ static short append_bin_line(
 	trap_string_clear(tmp);
 
 	//create arg A binary
-	int_to_bin_str(str_to_int(arga + 1), IS_WIDTH_ARG_A, tmp);
+	int_to_bin_str(atoi(arga + 1), IS_WIDTH_ARG_A, tmp);
 	trap_string_append_string(binstr, tmp);
 	trap_string_clear(tmp);
 
@@ -65,7 +83,7 @@ static short append_bin_line(
 	//create arg B binary
 	if (argb[0] == LANG_PREFIX_REG)
 	{
-		int_to_bin_str(str_to_int(argb + 1), IS_WIDTH_ARG_B, tmp);
+		int_to_bin_str(atoi(argb + 1), IS_WIDTH_ARG_B, tmp);
 		trap_string_append_string(binstr, tmp);
 	}
 	else
@@ -99,7 +117,7 @@ static trap_string* parse_line(trap_string* curline)
 	char** tokens = NULL;
 	size_t numtokens = 0;
 
-	short parsing_token = 0;
+	int parsing_token = 0;
 
 	//tokenize
 	size_t i;
@@ -107,22 +125,18 @@ static trap_string* parse_line(trap_string* curline)
 	{
 		char c = curline->chars[i];
 
-		if (is_whitespace(c))
+		if (isspace(c))
 		{
 			curline->chars[i] = '\0';
+			parsing_token = 0;
 		}
-
-		if (!parsing_token && !is_whitespace(c))
+		else if (!parsing_token)
 		{
 			numtokens += 1;
 			tokens = realloc(tokens, numtokens * sizeof(char*));
 			tokens[numtokens - 1] = (curline->chars + i);
 
 			parsing_token = 1;
-		}
-		else if (parsing_token && is_whitespace(c))
-		{
-			parsing_token = 0;
 		}
 	}
 
@@ -131,37 +145,17 @@ static trap_string* parse_line(trap_string* curline)
 		printf("Token: '%s'\n", tokens[i]);
 	}
 
-	command cmd;
+	command cmd = COMMAND_NONE;
 	char* cmd_token = tokens[0];
 
-	printf("%s\n", cmd_token);
-
-	if (strings_equal(cmd_token, LANG_TOKEN_ADD))
-		cmd = COMMAND_ADD;
-	else if (strings_equal(cmd_token, LANG_TOKEN_SUB))
-		cmd = COMMAND_SUB;
-	else if (strings_equal(cmd_token, LANG_TOKEN_SET))
-		cmd = COMMAND_SET;
-	else if (strings_equal(cmd_token, LANG_TOKEN_AND))
-		cmd = COMMAND_AND;
-	else if (strings_equal(cmd_token, LANG_TOKEN_OR))
-		cmd = COMMAND_OR;
-	else if (strings_equal(cmd_token, LANG_TOKEN_NAND))
-		cmd = COMMAND_NAND;
-	else if (strings_equal(cmd_token, LANG_TOKEN_NOR))
-		cmd = COMMAND_NOR;
-	else if (strings_equal(cmd_token, LANG_TOKEN_XOR))
-		cmd = COMMAND_XOR;
-	else if (strings_equal(cmd_token, LANG_TOKEN_XNOR))
-		cmd = COMMAND_XNOR;
-	else if (strings_equal(cmd_token, LANG_TOKEN_RSHIFT))
-		cmd = COMMAND_RSHIFT;
-	else if (strings_equal(cmd_token, LANG_TOKEN_LSHIFT))
-		cmd = COMMAND_LSHIFT;
-	else if (strings_equal(cmd_token, LANG_TOKEN_INVERT))
-		cmd = COMMAND_INVERT;
-	else
-		cmd = COMMAND_NONE;
+	for (i = 0; i < COMMAND_NONE; ++i)
+	{
+		if (strcmp(cmd_token, command_strings[i]) == 0)
+		{
+			cmd = i;
+			break;
+		}
+	}
 
 	trap_string* binstr = create_bin(cmd, tokens);
 

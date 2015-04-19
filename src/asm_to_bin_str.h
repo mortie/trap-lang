@@ -3,6 +3,41 @@
 
 #include "trap_string.h"
 
+#define LANG_TOKEN_ADD "ADD"
+#define LANG_TOKEN_SUB "SUB"
+#define LANG_TOKEN_SET "SET"
+#define LANG_TOKEN_AND "AND"
+#define LANG_TOKEN_OR "OR"
+#define LANG_TOKEN_NAND "NAND"
+#define LANG_TOKEN_NOR "NOR"
+#define LANG_TOKEN_XOR "XOR"
+#define LANG_TOKEN_XNOR "XNOR"
+#define LANG_TOKEN_RSHIFT "RSHIFT"
+#define LANG_TOKEN_LSHIFT "LSHIFT"
+#define LANG_TOKEN_INVERT "INVERT"
+#define LANG_PREFIX_REG 'R'
+#define IS_WIDTH_OP_CODE 4
+#define IS_WIDTH_ARG_A 4
+#define IS_WIDTH_ARG_B 4
+#define IS_WIDTH_DIRECT_B 8
+
+typedef enum command
+{
+	COMMAND_ADD,
+	COMMAND_SUB,
+	COMMAND_SET,
+	COMMAND_AND,
+	COMMAND_OR,
+	COMMAND_NAND,
+	COMMAND_NOR,
+	COMMAND_XOR,
+	COMMAND_XNOR,
+	COMMAND_RSHIFT,
+	COMMAND_LSHIFT,
+	COMMAND_INVERT,
+	COMMAND_NONE
+} command;
+
 trap_string* asm_to_bin_str(trap_string* tstr);
 
 #endif

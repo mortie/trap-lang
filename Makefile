@@ -1,2 +1,4 @@
 build:
-	gcc -o trap src/*.c
+	gcc -o3 -o trapc src/*.c
+install:
+	mv trapc /usr/bin/trapc

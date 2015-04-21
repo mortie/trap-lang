@@ -13,7 +13,8 @@ static const char* command_strings[] =
 	"XNOR",
 	"RSHIFT",
 	"LSHIFT",
-	"INVERT"
+	"INVERT",
+	"HALT"
 };
 
 typedef enum command
@@ -30,6 +31,7 @@ typedef enum command
 	COMMAND_RSHIFT,
 	COMMAND_LSHIFT,
 	COMMAND_INVERT,
+	COMMAND_HALT,
 	COMMAND_NONE
 } command;
 
@@ -50,7 +52,10 @@ static int append_bin_line(
 		char* argb)
 {
 	if (arga[0] != LANG_PREFIX_REG)
+	{
+		trap_log(TRAP_E_ERROR, "Expected register.");
 		return 0;
+	}
 
 	trap_string* tmp = trap_string_create();
 
@@ -65,8 +70,7 @@ static int append_bin_line(
 	}
 	else
 	{
-		//do neat things, this is placeholder
-		int_to_bin_str(0, IS_WIDTH_DIRECT_B, tmp);
+		int_to_bin_str(atoi(argb), IS_WIDTH_DIRECT_B, tmp);
 		trap_string_append_string(binstr, tmp);
 	}
 	trap_string_clear(tmp);
@@ -106,7 +110,24 @@ static trap_string* create_bin(command cmd, char** tokens, size_t numtokens)
 	{
 	case COMMAND_ADD:
 	case COMMAND_SUB:
+	case COMMAND_SET:
+	case COMMAND_AND:
+	case COMMAND_OR:
+	case COMMAND_NAND:
+	case COMMAND_NOR:
+	case COMMAND_XOR:
+	case COMMAND_XNOR:
 		required_tokens = 3;
+		break;
+
+	case COMMAND_RSHIFT:
+	case COMMAND_LSHIFT:
+	case COMMAND_INVERT:
+		required_tokens = 2;
+		break;
+
+	case COMMAND_HALT:
+		required_tokens = 1;
 	}
 
 	if (numtokens < required_tokens)
@@ -120,9 +141,66 @@ static trap_string* create_bin(command cmd, char** tokens, size_t numtokens)
 	case COMMAND_ADD:
 		append_bin_line(binstr, "0001", '1', tokens[1], tokens[2]);
 		break;
+
 	case COMMAND_SUB:
 		append_bin_line(binstr, "0010", '1', tokens[1], tokens[2]);
 		break;
+
+	case COMMAND_SET:
+		append_bin_line(binstr, "0011", '0', tokens[1], tokens[2]);
+		break;
+
+	case COMMAND_AND:
+		append_bin_line(binstr, "0101", '1', tokens[1], tokens[2]);
+		break;
+
+	//A = A NOR B
+	//A = A NOR 0
+	case COMMAND_OR:
+		append_bin_line(binstr, "0100", '1', tokens[1], tokens[2]);
+		append_bin_line(binstr, "0100", '1', tokens[1], "0");
+		break;
+
+	//A = A AND B
+	//A = A NOR 0
+	case COMMAND_NAND:
+		append_bin_line(binstr, "0101", '1', tokens[1], tokens[2]);
+		append_bin_line(binstr, "0100", '1', tokens[1], "0");
+		break;
+
+	case COMMAND_NOR:
+		append_bin_line(binstr, "0100", '1', tokens[1], tokens[2]);
+		break;
+
+	case COMMAND_XOR:
+		append_bin_line(binstr, "0110", '1', tokens[1], tokens[2]);
+		break;
+
+	//A = A XOR B
+	//A = A NOR B
+	case COMMAND_XNOR:
+		append_bin_line(binstr, "0110", '1', tokens[1], tokens[2]);
+		append_bin_line(binstr, "0100", '1', tokens[1], "0");
+		break;
+
+	case COMMAND_RSHIFT:
+		append_bin_line(binstr, "0111", '0', tokens[1], tokens[1]);
+		break;
+
+	//A = A + A
+	case COMMAND_LSHIFT:
+		append_bin_line(binstr, "0001", '1', tokens[1], tokens[1]);
+		break;
+
+	//A = A NOR 0
+	case COMMAND_INVERT:
+		append_bin_line(binstr, "0100", '1', tokens[1], "0");
+		break;
+
+	case COMMAND_HALT:
+		append_bin_line(binstr, "1111", '0', "R0", "0");
+		break;
+
 	case COMMAND_NONE:
 		trap_log(TRAP_E_ERROR, "Unknown command.");
 		break;

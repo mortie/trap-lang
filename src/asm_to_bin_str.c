@@ -123,6 +123,9 @@ static trap_string* create_bin(command cmd, char** tokens, size_t numtokens)
 	case COMMAND_SUB:
 		append_bin_line(binstr, "0010", '1', tokens[1], tokens[2]);
 		break;
+	case COMMAND_NONE:
+		trap_log(TRAP_E_ERROR, "Unknown command.");
+		break;
 	}
 
 	return binstr;

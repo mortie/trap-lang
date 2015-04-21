@@ -1,7 +1,6 @@
 #include "asm_to_bin_str.h"
-#include <stdio.h>
 
-const char* command_strings[] =
+static const char* command_strings[] =
 {
 	"ADD",
 	"SUB",
@@ -97,16 +96,33 @@ static int append_bin_line(
 	trap_string_free(tmp);
 }
 
-static trap_string* create_bin(command cmd, char** tokens)
+static trap_string* create_bin(command cmd, char** tokens, size_t numtokens)
 {
 	trap_string* binstr = trap_string_create();
+
+	size_t required_tokens = 0;
+
+	switch(cmd)
+	{
+	case COMMAND_ADD:
+	case COMMAND_SUB:
+		required_tokens = 3;
+	}
+
+	if (numtokens < required_tokens)
+	{
+		trap_log(TRAP_E_ERROR, "Not enough tokens.");
+		return binstr;
+	}
 
 	switch(cmd)
 	{
 	case COMMAND_ADD:
 		append_bin_line(binstr, "0001", '1', tokens[1], tokens[2]);
+		break;
 	case COMMAND_SUB:
 		append_bin_line(binstr, "0010", '1', tokens[1], tokens[2]);
+		break;
 	}
 
 	return binstr;
@@ -140,10 +156,8 @@ static trap_string* parse_line(trap_string* curline)
 		}
 	}
 
-	for (i = 0; i < numtokens; ++i)
-	{
-		printf("Token: '%s'\n", tokens[i]);
-	}
+	if (numtokens < 1)
+		return trap_string_create();
 
 	command cmd = COMMAND_NONE;
 	char* cmd_token = tokens[0];
@@ -157,7 +171,7 @@ static trap_string* parse_line(trap_string* curline)
 		}
 	}
 
-	trap_string* binstr = create_bin(cmd, tokens);
+	trap_string* binstr = create_bin(cmd, tokens, numtokens);
 
 	//free everything
 	free(tokens);
@@ -177,6 +191,7 @@ trap_string* asm_to_bin_str(trap_string* tstr)
 
 		if (c == '\n')
 		{
+			trap_log_line_increment();
 			trap_string_append_char(curline, '\n');
 			trap_string_append_string(binstr, parse_line(curline));
 			trap_string_clear(curline);

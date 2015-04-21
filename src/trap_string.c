@@ -1,7 +1,5 @@
 #include "trap_string.h"
 
-#include <stdio.h>
-
 static size_t get_closest_power(size_t n)
 {
 	size_t closest_power = 1;
@@ -57,6 +55,21 @@ void trap_string_set(trap_string* tstr, char* str, size_t len)
 	tstr->allocated = get_closest_power(len);
 	tstr->chars = realloc(tstr->chars, sizeof(char) * tstr->allocated);
 	memcpy(tstr->chars, str, sizeof(char) * len);
+}
+
+void trap_string_print(trap_string* tstr)
+{
+	size_t i;
+	for (i = 0; i < tstr->length; ++i)
+	{
+		putchar(tstr->chars[i]);
+	}
+}
+
+void trap_string_println(trap_string* tstr)
+{
+	trap_string_print(tstr);
+	putchar('\n');
 }
 
 void trap_string_free(trap_string* tstr)

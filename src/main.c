@@ -1,5 +1,6 @@
 #include "trap_string.h"
 #include "asm_to_bin_str.h"
+#include "trap_log.h"
 #include <stdio.h>
 
 int main()
@@ -13,6 +14,11 @@ int main()
 	}
 
 	trap_string* binstr = asm_to_bin_str(tstr);
+
+	if (trap_log_err_exists())
+		return 1;
+	else
+		trap_string_print(binstr);
 
 	return 0;
 }

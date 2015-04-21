@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 typedef struct trap_string
 {
@@ -22,6 +23,12 @@ void trap_string_append_string(trap_string* tstr, trap_string* appendstr);
 
 void trap_string_set(trap_string* tstr, char* str, size_t len);
 
+void trap_string_print(trap_string* tstr);
+
+void trap_string_println(trap_string* tstr);
+
 void trap_string_free(trap_string* tstr);
+
+void trap_string_clear(trap_string* tstr);
 
 #endif

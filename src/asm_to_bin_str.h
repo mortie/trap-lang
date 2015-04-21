@@ -2,6 +2,7 @@
 #define ASM_TO_BIN_STR_H
 
 #include "trap_string.h"
+#include "trap_log.h"
 
 #define LANG_PREFIX_REG 'R'
 #define IS_WIDTH_OP_CODE 4

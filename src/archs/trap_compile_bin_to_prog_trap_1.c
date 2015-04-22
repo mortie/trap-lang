@@ -1,8 +1,6 @@
-#include "bin_str_to_prog.h"
+#include "../trap_compile.h"
 
-#include <stdio.h>
-
-trap_string* bin_str_to_prog(trap_string* binstr)
+trap_string* trap_compile_bin_to_prog_trap_1(trap_string* tstr)
 {
 	trap_string* progstr = trap_string_create();
 
@@ -10,9 +8,9 @@ trap_string* bin_str_to_prog(trap_string* binstr)
 	trap_string_append_chars(progstr, progheader, strlen(progheader));
 
 	size_t i;
-	for (i = 0; i < binstr->length; ++i)
+	for (i = 0; i < tstr->length; ++i)
 	{
-		char c = binstr->chars[i];
+		char c = tstr->chars[i];
 
 		switch (c)
 		{
@@ -27,6 +25,4 @@ trap_string* bin_str_to_prog(trap_string* binstr)
 			break;
 		}
 	}
-
-	return progstr;
 }

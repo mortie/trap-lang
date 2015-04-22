@@ -1,4 +1,5 @@
 #include "../trap_compile.h"
+#include <string.h>
 
 trap_string* trap_compile_bin_to_prog_trap_1(trap_string* tstr)
 {

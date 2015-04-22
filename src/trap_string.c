@@ -1,4 +1,7 @@
 #include "trap_string.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 static size_t get_closest_power(size_t n)
 {

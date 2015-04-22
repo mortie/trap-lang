@@ -4,11 +4,7 @@
 #include "trap_string.h"
 #include <stddef.h>
 
-#define LANG_PREFIX_REG 'R'
-#define IS_WIDTH_OP_CODE 4
-#define IS_WIDTH_ARG_A 4
-#define IS_WIDTH_ARG_B 4
-#define IS_WIDTH_DIRECT_B 8
+#define TRAP_LANG_PREFIX_REG 'R'
 
 typedef struct trap_compile_label
 {

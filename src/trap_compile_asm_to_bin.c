@@ -1,5 +1,6 @@
 #include "trap_compile.h"
 #include "trap_util.h"
+#include <stdlib.h>
 
 static const char* command_strings[] =
 {

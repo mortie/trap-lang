@@ -2,6 +2,11 @@
 #include "../trap_util.h"
 #include "../trap_log.h"
 
+#define IS_WIDTH_OP_CODE 4
+#define IS_WIDTH_ARG_A 4
+#define IS_WIDTH_ARG_B 4
+#define IS_WIDTH_DIRECT_B 8
+
 static int append_bin_line(
 		trap_string* binstr,
 		char op[IS_WIDTH_OP_CODE],
@@ -9,7 +14,7 @@ static int append_bin_line(
 		char* arga,
 		char* argb)
 {
-	if (arga[0] != LANG_PREFIX_REG)
+	if (arga[0] != TRAP_LANG_PREFIX_REG)
 	{
 		trap_log(TRAP_E_ERROR, "Expected register.");
 		return 0;
@@ -21,7 +26,7 @@ static int append_bin_line(
 	trap_string_append_chars(binstr, op, IS_WIDTH_OP_CODE);
 
 	//create direct B binary
-	if (argb[0] == LANG_PREFIX_REG)
+	if (argb[0] == TRAP_LANG_PREFIX_REG)
 	{
 		trap_util_int_to_bin(0, IS_WIDTH_DIRECT_B, tmp);
 		trap_string_append_string(binstr, tmp);
@@ -42,7 +47,7 @@ static int append_bin_line(
 	trap_string_append_char(binstr, readra);
 
 	//create arg B binary
-	if (argb[0] == LANG_PREFIX_REG)
+	if (argb[0] == TRAP_LANG_PREFIX_REG)
 	{
 		trap_util_int_to_bin(atoi(argb + 1), IS_WIDTH_ARG_B, tmp);
 		trap_string_append_string(binstr, tmp);
@@ -89,6 +94,7 @@ trap_string* trap_compile_asm_to_bin_trap_1(
 
 	case COMMAND_HALT:
 		required_tokens = 1;
+		break;
 	}
 
 	if (numtokens < required_tokens)

@@ -2,6 +2,7 @@
 #include "../trap_util.h"
 #include "../trap_log.h"
 #include <string.h>
+#include <stdlib.h>
 
 #define IS_WIDTH_OP_CODE 4
 #define IS_WIDTH_ARG_A 4
@@ -64,6 +65,8 @@ static int append_bin_line(
 	trap_string_free(tmp);
 
 	trap_compile_current_binline_increment();
+
+	return 0;
 }
 
 trap_string* trap_compile_asm_to_bin_trap_1(
@@ -99,6 +102,8 @@ trap_string* trap_compile_asm_to_bin_trap_1(
 
 	case COMMAND_HALT:
 		required_tokens = 1;
+		break;
+	default:
 		break;
 	}
 
@@ -187,7 +192,7 @@ trap_string* trap_compile_asm_to_bin_trap_1(
 
 		char linestr[11];
 		memset(linestr, '\0', sizeof(char) * 11);
-		sprintf(linestr, "%.*zu", line, 10);
+		sprintf(linestr, "%.*zu", 10, line);
 
 		if (numtokens == 2)
 		{
@@ -247,6 +252,9 @@ trap_string* trap_compile_asm_to_bin_trap_1(
 		{
 			trap_log(TRAP_E_ERROR, "Expected 1 or 5 arguments.");
 		}
+		break;
+
+	default:
 		break;
 	}
 

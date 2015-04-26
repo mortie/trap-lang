@@ -2,6 +2,7 @@
 #include "trap_util.h"
 #include "trap_log.h"
 #include <stdlib.h>
+#include <ctype.h>
 
 static trap_string* parse_line(trap_string* curline, trap_arch arch, trap_map* labels)
 {
@@ -64,6 +65,9 @@ static trap_string* parse_line(trap_string* curline, trap_arch arch, trap_map* l
 				numtokens,
 				labels
 			);
+			break;
+		default:
+			trap_log(TRAP_E_ERROR, "Unknown architecture.");
 			break;
 		}
 	}

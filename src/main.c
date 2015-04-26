@@ -5,13 +5,13 @@
 #include <stdio.h>
 #include <getopt.h>
 
-static enum output_type
+typedef enum output_type
 {
 	OUT_BINARY,
 	OUT_PROG
 } output_type;
 
-static int compile(trap_string* tstr, enum output_type outtype, trap_arch arch)
+static int compile(trap_string* tstr, output_type outtype, trap_arch arch)
 {
 	fprintf(stderr, "Compiling to %s...\n\n", trap_compile_get_arch_str(arch));
 
@@ -38,7 +38,7 @@ static int compile(trap_string* tstr, enum output_type outtype, trap_arch arch)
 int main(int argc, char** argv)
 {
 	int c;
-	enum output_type outtype = OUT_BINARY;
+	output_type outtype = OUT_BINARY;
 	trap_arch arch = TRAP_ARCH_TRAP_1;
 
 	while (1)

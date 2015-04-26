@@ -17,6 +17,7 @@ trap_string* trap_string_create()
 	tstr->length = 0;
 	tstr->allocated = 0;
 	tstr->chars = NULL;
+	return tstr;
 }
 
 void trap_string_init(trap_string* tstr)

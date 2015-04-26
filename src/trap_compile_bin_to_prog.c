@@ -6,5 +6,9 @@ trap_string* trap_compile_bin_to_prog(trap_arch arch, trap_string* binstr)
 	{
 	case TRAP_ARCH_TRAP_1:
 		return trap_compile_bin_to_prog_trap_1(binstr);
+		break;
+	default:
+		return trap_string_create();
+		break;
 	}
 }

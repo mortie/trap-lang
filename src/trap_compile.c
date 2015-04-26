@@ -50,6 +50,8 @@ trap_command trap_compile_get_command(char* str)
 			break;
 		}
 	}
+
+	return cmd;
 }
 
 trap_arch trap_compile_get_arch(char* str)

@@ -90,6 +90,7 @@ trap_string* trap_compile_asm_to_bin_trap_1(
 	case COMMAND_NOR:
 	case COMMAND_XOR:
 	case COMMAND_XNOR:
+	case COMMAND_INPUT:
 		required_tokens = 3;
 		break;
 
@@ -253,6 +254,32 @@ trap_string* trap_compile_asm_to_bin_trap_1(
 			trap_log(TRAP_E_ERROR, "Expected 1 or 5 arguments.");
 		}
 		break;
+
+	//No, this isn't pretty. It should be fixed some time.
+	case COMMAND_INPUT:
+	{
+		size_t len = strlen(tokens[2]);
+		char* str = malloc(sizeof(char) * (len + 1));
+		memcpy(str + 1, tokens[2], len);
+		str[0] = 'R';
+		append_bin_line(binstr, "1011", '0', str, "0");
+		free(str);
+
+		append_bin_line(binstr, "0011", '0', tokens[1], "0");
+		break;
+	}
+
+	//No, this isn't pretty. It should be fixed some time.
+	case COMMAND_OUTPUT:
+	{
+		size_t len = strlen(tokens[2]);
+		char* str = malloc(sizeof(char) * (len + 1));
+		memcpy(str + 1, tokens[2], len);
+		str[0] = 'R';
+		append_bin_line(binstr, "1100", '0', str, tokens[1]);
+		free(str);
+		break;
+	}
 
 	default:
 		break;

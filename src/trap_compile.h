@@ -23,6 +23,8 @@ typedef enum trap_command
 	COMMAND_INVERT,
 	COMMAND_LABEL,
 	COMMAND_GOTO,
+	COMMAND_INPUT,
+	COMMAND_OUTPUT,
 	COMMAND_HALT,
 	COMMAND_NONE
 } trap_command;

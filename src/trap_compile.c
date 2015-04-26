@@ -17,6 +17,8 @@ static const char* command_strings[] =
 	"INVERT",
 	"LABEL",
 	"GOTO",
+	"IN",
+	"OUT",
 	"HALT"
 };
 

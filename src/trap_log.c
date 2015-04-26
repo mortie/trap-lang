@@ -28,6 +28,11 @@ void trap_log_line_set(size_t i)
 	current_line = i;
 }
 
+size_t trap_log_line_get()
+{
+	return current_line;
+}
+
 void trap_log_line_increment()
 {
 	current_line += 1;

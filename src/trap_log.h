@@ -16,6 +16,8 @@ void trap_log_line_set(size_t i);
 
 void trap_log_line_increment();
 
+size_t trap_log_line_get();
+
 int trap_log_err_exists();
 
 #endif

@@ -1,6 +1,7 @@
-#include "../trap_compile.h"
+#include "../trap_archs.h"
 #include "../trap_util.h"
 #include "../trap_log.h"
+#include <string.h>
 
 #define IS_WIDTH_OP_CODE 4
 #define IS_WIDTH_ARG_A 4
@@ -61,12 +62,15 @@ static int append_bin_line(
 	trap_string_append_char(binstr, '\n');
 
 	trap_string_free(tmp);
+
+	trap_compile_current_binline_increment();
 }
 
 trap_string* trap_compile_asm_to_bin_trap_1(
 		trap_command cmd,
 		char** tokens,
-		size_t numtokens)
+		size_t numtokens,
+		trap_map* labels)
 {
 	trap_string* binstr = trap_string_create();
 
@@ -89,6 +93,7 @@ trap_string* trap_compile_asm_to_bin_trap_1(
 	case COMMAND_RSHIFT:
 	case COMMAND_LSHIFT:
 	case COMMAND_INVERT:
+	case COMMAND_GOTO:
 		required_tokens = 2;
 		break;
 
@@ -167,6 +172,83 @@ trap_string* trap_compile_asm_to_bin_trap_1(
 	case COMMAND_HALT:
 		append_bin_line(binstr, "1111", '0', "R0", "0");
 		break;
+
+	case COMMAND_GOTO:
+	{
+		size_t* l = trap_map_get(labels, tokens[1]);
+
+		if(l == NULL)
+		{
+			trap_log(TRAP_E_ERROR, "Unknown label.");
+			break;
+		}
+
+		size_t line = *l;
+
+		char linestr[11];
+		memset(linestr, '\0', sizeof(char) * 11);
+		sprintf(linestr, "%.*zu", line, 10);
+
+		if (numtokens == 2)
+		{
+			append_bin_line(binstr, "1001", '1', "R0", "0");
+			append_bin_line(binstr, "1010", '0', "R0", linestr);
+		}
+		else if (numtokens == 6)
+		{
+			if (strcmp(tokens[2], "IF") != 0)
+			{
+				trap_log(TRAP_E_ERROR, "Expected 'IF'.");
+				break;
+			}
+
+			char* val1 = tokens[3];
+			char* val2 = tokens[5];
+			char* sign = tokens[4];
+
+			if ((val1[0] != TRAP_LANG_PREFIX_REG
+			||   val2[0] != TRAP_LANG_PREFIX_REG)
+			&&  strcmp(sign, "==") != 0)
+			{
+				trap_log(TRAP_E_ERROR, "Both values must be registers.");
+			}
+
+			if (strcmp(sign, "==") == 0)
+			{
+				append_bin_line(binstr, "1001", '1', val1, val2);
+				append_bin_line(binstr, "1010", '0', "R0", linestr);
+			}
+			else if (strcmp(sign, ">") == 0)
+			{
+				append_bin_line(binstr, "1000", '1', val1, val2);
+				append_bin_line(binstr, "1010", '0', "R0", linestr);
+			}
+			else if (strcmp(sign, "<") == 0)
+			{
+				append_bin_line(binstr, "1000", '1', val2, val1);
+				append_bin_line(binstr, "1010", '0', "R0", linestr);
+			}
+			else if (strcmp(sign, ">=") == 0)
+			{
+				append_bin_line(binstr, "1000", '1', val1, val2);
+				append_bin_line(binstr, "1010", '0', "R0", linestr);
+				append_bin_line(binstr, "1001", '1', val1, val2);
+				append_bin_line(binstr, "1010", '0', "R0", linestr);
+			}
+			else if (strcmp(sign, "<=") == 0)
+			{
+				append_bin_line(binstr, "1001", '1', val1, val2);
+				append_bin_line(binstr, "1010", '0', "R0", linestr);
+				append_bin_line(binstr, "1000", '1', val2, val1);
+				append_bin_line(binstr, "1010", '0', "R0", linestr);
+			}
+		}
+		else
+		{
+			trap_log(TRAP_E_ERROR, "Expected 1 or 5 arguments.");
+		}
+		break;
+	}
 
 	case COMMAND_NONE:
 		trap_log(TRAP_E_ERROR, "Unknown command.");

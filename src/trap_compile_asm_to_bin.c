@@ -1,30 +1,9 @@
-#include "trap_compile.h"
+#include "trap_archs.h"
 #include "trap_util.h"
+#include "trap_log.h"
 #include <stdlib.h>
 
-static const char* command_strings[] =
-{
-	"ADD",
-	"SUB",
-	"SET",
-	"AND",
-	"OR",
-	"NAND",
-	"NOR",
-	"XOR",
-	"XNOR",
-	"RSHIFT",
-	"LSHIFT",
-	"INVERT",
-	"HALT"
-};
-
-static const char* arch_strings[] =
-{
-	"trap-1"
-};
-
-static trap_string* parse_line(trap_string* curline, trap_arch arch)
+static trap_string* parse_line(trap_string* curline, trap_arch arch, trap_map* labels)
 {
 	char** tokens = NULL;
 	size_t numtokens = 0;
@@ -55,32 +34,40 @@ static trap_string* parse_line(trap_string* curline, trap_arch arch)
 	if (numtokens < 1)
 		return trap_string_create();
 
-	trap_command cmd = COMMAND_NONE;
 	char* cmd_token = tokens[0];
 
-	for (i = 0; i < COMMAND_NONE; ++i)
+	trap_command cmd = trap_compile_get_command(cmd_token);
+
+	trap_string* binstr;
+
+	if (cmd == COMMAND_LABEL)
 	{
-		if (strcmp(cmd_token, command_strings[i]) == 0)
+		if (numtokens < 2)
 		{
-			cmd = i;
+			trap_log(TRAP_E_ERROR, "Missing arguments.");
+			return trap_string_create();
+		}
+
+		size_t linenum = trap_compile_current_binline_get();
+		trap_map_set(labels, tokens[1], &linenum);
+
+		binstr = trap_string_create();
+	}
+	else
+	{
+		switch (arch)
+		{
+		case TRAP_ARCH_TRAP_1:
+			binstr = trap_compile_asm_to_bin_trap_1(
+				cmd,
+				tokens,
+				numtokens,
+				labels
+			);
 			break;
 		}
 	}
 
-	trap_string* binstr;
-
-	switch (arch)
-	{
-	case TRAP_ARCH_TRAP_1:
-		binstr = trap_compile_asm_to_bin_trap_1(
-			cmd,
-			tokens,
-			numtokens
-		);
-		break;
-	}
-
-	//free everything
 	free(tokens);
 
 	return binstr;
@@ -88,6 +75,8 @@ static trap_string* parse_line(trap_string* curline, trap_arch arch)
 
 trap_string* trap_compile_asm_to_bin(trap_arch arch, trap_string* tstr)
 {
+	trap_map* labels = trap_map_create(sizeof(size_t));
+
 	trap_string* binstr = trap_string_create();
 	trap_string* curline = trap_string_create();
 
@@ -100,7 +89,7 @@ trap_string* trap_compile_asm_to_bin(trap_arch arch, trap_string* tstr)
 		{
 			trap_log_line_increment();
 			trap_string_append_char(curline, '\n');
-			trap_string_append_string(binstr, parse_line(curline, arch));
+			trap_string_append_string(binstr, parse_line(curline, arch, labels));
 			trap_string_clear(curline);
 		}
 		else
@@ -112,27 +101,4 @@ trap_string* trap_compile_asm_to_bin(trap_arch arch, trap_string* tstr)
 	trap_string_free(curline);
 
 	return binstr;
-}
-
-trap_arch trap_compile_get_arch(char* str)
-{
-	trap_arch arch = TRAP_ARCH_NONE;
-
-	size_t i;
-	for (i = 0; i < TRAP_ARCH_NONE; ++i)
-	{
-		if (strcmp(str, arch_strings[i]) == 0)
-		{
-			arch = i;
-			break;
-		}
-	}
-
-	return arch;
-}
-
-const char* trap_compile_get_arch_str(trap_arch arch)
-{
-	size_t i = (size_t)arch;
-	return arch_strings[i];
 }

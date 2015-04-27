@@ -4,6 +4,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <stdio.h>
+
 #define IS_WIDTH_OP_CODE 4
 #define IS_WIDTH_ARG_A 4
 #define IS_WIDTH_ARG_B 4
@@ -91,6 +93,7 @@ trap_string* trap_compile_asm_to_bin_trap_1(
 	case COMMAND_XOR:
 	case COMMAND_XNOR:
 	case COMMAND_INPUT:
+	case COMMAND_OUTPUT:
 		required_tokens = 3;
 		break;
 

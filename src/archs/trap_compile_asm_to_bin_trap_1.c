@@ -212,9 +212,8 @@ trap_string* trap_compile_asm_to_bin_trap_1(
 			char* val2 = tokens[5];
 			char* sign = tokens[4];
 
-			if ((val1[0] != TRAP_LANG_PREFIX_REG
-			||   val2[0] != TRAP_LANG_PREFIX_REG)
-			&&  strcmp(sign, "==") != 0)
+			if (val1[0] != TRAP_LANG_PREFIX_REG
+			||  val2[0] != TRAP_LANG_PREFIX_REG)
 			{
 				trap_log(TRAP_E_ERROR, "Both values must be registers.");
 			}
